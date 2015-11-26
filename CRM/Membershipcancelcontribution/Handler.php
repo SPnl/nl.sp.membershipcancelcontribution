@@ -17,7 +17,7 @@ class CRM_Membershipcancelcontribution_Handler {
         $sql = "SELECT c.id FROM `civicrm_contribution` c
                 INNER JOIN `civicrm_membership_payment` `mp` ON `c`.`id` = `mp`.`contribution_id`
                 where `mp`.`membership_id` = %1
-                and DATE(`c`.`receive_date`) >= DATE(%2)
+                and DATE(`c`.`receive_date`) >= DATE(%2) and DATE(`c`.`receive_date`) >= NOW()
                   ";
         $params = array();
         $params[1] = array($id, 'Integer');
