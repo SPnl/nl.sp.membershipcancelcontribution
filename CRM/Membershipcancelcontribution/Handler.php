@@ -3,6 +3,8 @@
 class CRM_Membershipcancelcontribution_Handler {
 
     public static function post($op, $objectName, $id, &$objectRef) {
+        $cancelled_status_id = civicrm_api3('OptionValue', 'getvalue', array('return' => 'value', 'name' => 'Cancelled', 'option_group_name' => 'contribution_status'));
+        $refunded_status_id = civicrm_api3('OptionValue', 'getvalue', array('return' => 'value', 'name' => 'Refunded', 'option_group_name' => 'contribution_status'));
         if ($objectName != 'Membership') {
             return;
         }
@@ -14,7 +16,7 @@ class CRM_Membershipcancelcontribution_Handler {
         $endDate = new DateTime($objectRef->end_date);
 
         //find contributions with status pending (2)
-        $sql = "SELECT c.id FROM `civicrm_contribution` c
+        $sql = "SELECT c.id, c.contribution_status_id FROM `civicrm_contribution` c
                 INNER JOIN `civicrm_membership_payment` `mp` ON `c`.`id` = `mp`.`contribution_id`
                 where `mp`.`membership_id` = %1
                 and DATE(`c`.`receive_date`) >= DATE(%2) and DATE(`c`.`receive_date`) >= NOW()
@@ -24,7 +26,10 @@ class CRM_Membershipcancelcontribution_Handler {
         $params[2] = array($endDate->format("Y-m-d"), 'String');
         $dao = CRM_Core_DAO::executeQuery($sql, $params);
         while ($dao->fetch()) {
-            civicrm_api3('Contribution', 'Create', array('id' => $dao->id, 'contribution_status_id' => 3));
+            // Only cancel the contribution when status is not cancelled or refunded.
+            if ($dao->contribution_status_id != $cancelled_status_id && $dao->contribution_status_id != $refunded_status_id) {
+                civicrm_api3('Contribution', 'Create', array('id' => $dao->id, 'contribution_status_id' => $cancelled_status_id));
+            }
         }
     }
 
