@@ -1,0 +1,13 @@
+{
+    "name": "spnl/nl.sp.membershipcancelcontribution",
+    "description": "Cancel contribution upon canceling of membership",
+    "type": "civicrm-module",
+    "license": "AGPL-3.0",
+    "authors": [
+        {
+            "name": "Jaap Jansma - CiviCooP",
+            "email": "helpdesk@civicoop.org"
+        }
+    ],
+    "require": {}
+}
