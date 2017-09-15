@@ -6,6 +6,7 @@ class CRM_Membershipcancelcontribution_Handler {
         $cancelled_status_id = civicrm_api3('OptionValue', 'getvalue', array('return' => 'value', 'name' => 'Cancelled', 'option_group_name' => 'contribution_status'));
         $refunded_status_id = civicrm_api3('OptionValue', 'getvalue', array('return' => 'value', 'name' => 'Refunded', 'option_group_name' => 'contribution_status'));
         $pending_status_id = civicrm_api3('OptionValue', 'getvalue', array('return' => 'value', 'name' => 'Pending', 'option_group_name' => 'contribution_status'));
+				$in_progress_status_id = civicrm_api3('OptionValue', 'getvalue', array('return' => 'value', 'name' => 'In Progress', 'option_group_name' => 'contribution_status'));
         if ($objectName != 'Membership') {
             return;
         }
@@ -33,7 +34,7 @@ class CRM_Membershipcancelcontribution_Handler {
             }
         }
 
-      //find contributions with status failed (4)
+      //find contributions with status In Progress (5)
       $sql = "SELECT c.id, c.contribution_status_id FROM `civicrm_contribution` c
                 INNER JOIN `civicrm_membership_payment` `mp` ON `c`.`id` = `mp`.`contribution_id`
                 where `mp`.`membership_id` = %1
@@ -41,7 +42,7 @@ class CRM_Membershipcancelcontribution_Handler {
                   ";
       $params = array();
       $params[1] = array($id, 'Integer');
-      $params[2] = array($pending_status_id, 'Integer');
+      $params[2] = array($in_progress_status_id, 'Integer');
       $dao = CRM_Core_DAO::executeQuery($sql, $params);
       while ($dao->fetch()) {
         $failedContribionParams = array('id' => $dao->id, 'contribution_status_id' => $cancelled_status_id);
