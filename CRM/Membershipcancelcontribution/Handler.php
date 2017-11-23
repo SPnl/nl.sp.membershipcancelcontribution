@@ -12,7 +12,7 @@ class CRM_Membershipcancelcontribution_Handler {
         }
 
         $status = CRM_Member_BAO_MembershipStatus::getMembershipStatus($objectRef->status_id);
-        if ($status['is_current_member'] || $status['name'] == 'Pending') {
+        if ($status['is_current_member'] || $status['name'] == 'Pending' || $status['name'] == 'Correctie') {
             return;
         }
         $endDate = new DateTime($objectRef->end_date);
