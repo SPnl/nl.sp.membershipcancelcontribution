@@ -3,6 +3,29 @@
 class CRM_Membershipcancelcontribution_Handler {
 
 	private static $processed_ids = array();
+	
+	private static $currentMembershipData = array();
+	
+	public static function pre($op, $objectName, $id, &$data) {
+		if ($objectName != 'Membership') {
+			return;
+		}
+		if ($op != 'edit') {
+			return;
+		}
+		$dao = CRM_Core_DAO::executeQuery("SELECT end_date, status_id FROM civicrm_membership WHERE id = %1", array(1=>array($id, 'Integer')));
+		if ($dao->fetch()) {
+			$end_date = false;
+			if ($dao->end_date) {
+				$end_date = new DateTime($end_date);
+				$end_date = $end_date->format('Ymd');
+			}
+			self::$currentMembershipData[$id] = array(
+				'status_id' => $dao->status_id,
+				'end_date' => $end_date,
+			);
+		}
+	}
 
 	public static function post($op, $objectName, $id, &$objectRef) {
 		if ($objectName != 'Membership') {
@@ -11,6 +34,14 @@ class CRM_Membershipcancelcontribution_Handler {
 		if ($op != 'edit') {
 			return;
 		}
+		// Check whether status or end date is changed
+		if (!isset(self::$currentMembershipData[$id])) {
+			return;
+		}
+		if ($objectRef->status_id == self::$currentMembershipData[$id]['status_id'] && self::$currentMembershipData[$id]['end_date'] == $end_date) {
+			return; // No change in status change or end date.
+		}
+		
 		// We check whether we already have processed this membership.
 		// Because the cancelletion of contribution we also update the membership status and we
 		// will probably end in a loop.

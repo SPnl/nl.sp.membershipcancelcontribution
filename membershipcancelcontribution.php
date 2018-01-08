@@ -2,6 +2,12 @@
 
 require_once 'membershipcancelcontribution.civix.php';
 
+function membershipcancelcontribution_civicrm_pre($op, $objectName, $id, &$data) {
+	if ($objectName == 'Membership' && $op == 'edit') {
+  	CRM_Membershipcancelcontribution_Handler::pre($op, $objectName, $id, $data);
+	}
+}
+
 function membershipcancelcontribution_civicrm_post($op, $objectName, $id, &$objectRef) {
 	if ($objectName == 'Membership' && $op == 'edit') {
   	CRM_Membershipcancelcontribution_Handler::post($op, $objectName, $id, $objectRef);
